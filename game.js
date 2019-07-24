@@ -1,59 +1,61 @@
-let gridX = 10;
-let gridY = 15;
-let minesPercentage = 0.15;
+var rows = 5;
+var cols = 5;
 
-let grid = [];
-for (var i = 0; i < gridX; ++i) {
-    var row = [];
-    for (var j = 0; j < gridY; ++j) {
-        row.push(0);
-    }
-    grid.push(row);
+var grid = new Grid(rows, cols, 0.2);
+var flagsUsed = grid.numberOfMines;
+
+$("#mineGrid").append(grid.getHTML());
+
+var marginheight = rows * 2 * 2;
+var paddingheight = rows * 2 * 10;
+var blockheight = Math.floor((window.innerHeight - marginheight - paddingheight) / (rows));
+blockheight -= blockheight / rows;
+
+var marginwidth = cols * 2 * 2;
+var paddingwidth = cols * 2 * 10;
+var blockwidth = Math.floor((window.innerWidth - marginwidth - paddingwidth) / cols);
+blockwidth -= blockwidth / cols;
+
+var XXX = Math.min(blockheight, blockwidth);
+var totalWidth = XXX * cols + marginwidth + paddingwidth;
+var totalHeight = XXX * rows + marginheight + paddingheight;
+
+var leftmargin = (window.innerWidth - totalWidth) / 2;
+
+$(".block").css("height", XXX.toString() + "px");
+$(".block").css("width", XXX.toString() + "px");
+$(".block").css("font-size", (XXX - 2).toString() + "px");
+$("#mineGrid").css("min-width", (totalWidth).toString() + "px");
+$("#mineGrid").css("min-height", (totalHeight).toString() + "px");
+
+$("#HUD").css("margin-left", leftmargin.toString() + "px");
+
+function updateMineGrid() {
+    $("#mineGrid").empty();
+    $("#mineGrid").append(grid.getHTML());
+    $(".block").css("height", XXX.toString() + "px");
+    $(".block").css("width", XXX.toString() + "px");
+    $(".block").css("font-size", (XXX - 2).toString() + "px");
 }
 
-let numberOfMines = Math.floor(minesPercentage * (gridX * gridY + 1));
-
-function randInt(a, b) {
-    return Math.floor(Math.random() * (b - a) + a);
+function handleClick(row, col) {
+    if (grid.firstClick === true) {
+        grid.firstClick = false;
+        grid.populateGrid(row, col);
+    }
+    // grid.grid[row][col].reveal();
+    if (grid.grid[row][col].number === -1) {
+        alert("BOMB! GAME OVER!");
+        window.location.reload();
+        return;
+    }
+    grid.floodFill(row, col);
+    updateMineGrid();
 }
 
-function isNeighbour(x1, y1, x2, y2) {
-    return Math.abs(x1 - x2) <= 1 && Math.abs(y1 - y2) <= 1;
-}
-
-function populateGrid(clickX, clickY) {
-    var count = 0;
-    while (count < numberOfMines) {
-        var randx = Randint(0, gridX - 1);
-        var randy = Randint(0, gridY - 1);
-        if (isNeighbour(clickX, clickY, randx, randy)) {
-            continue;
-        }
-        if (grid[randx][randy] === 0) {
-            grid[randx][randy] = -1;
-            count += 1;
-        }
-    }
-
-    var diffx = [-1, -1, -1, 0, 0, 1, 1, 1];
-    var diffy = [-1, 0, 1, -1, 1, -1, 0, 1];
-    for (var i = 0; i < x; ++i) {
-        for (var j = 0; j < y; ++j) {
-            if (grid[i][j] === -1) {
-                continue;
-            }
-            var count = 0;
-            for (var k = 0; k < 8; ++k) {
-                var newx = i + diffx[k];
-                var newy = j + diffy[k];
-                if (newx >= 0 && newx < x - 1 && newy >= 0 && newy < y - 1) {
-                    if (grid[newx][newy] === -1) {
-                        count += 1;
-                    }
-                }
-            }
-
-            grid[i][j] = count;
-        }
-    }
+function handleRightClick(row, col) {
+    if (grid.grid[row][col].unfolded === false) {return;}
+    grid.grid[row][col].flag();
+    updateMineGrid();
+    return false;
 }
