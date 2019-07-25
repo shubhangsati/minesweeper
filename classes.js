@@ -48,7 +48,6 @@ class Block {
 class Grid {
     constructor(rows, cols, minesPercentage=0.15) {
         this.solved = false;
-        this.revealedCells = 0;
         this.rows = rows;
         this.cols = cols;
         this.minesPercentage = minesPercentage;
@@ -129,7 +128,6 @@ class Grid {
         if (this.grid[row][col].number === -1) {return;}
         if (this.grid[row][col].unfolded === false) {return;}
         this.grid[row][col].reveal();
-        this.revealedCells++;
         if (this.grid[row][col].number != 0) {return;}
         var diffx = [-1, -1, -1, 0, 0, 1, 1, 1];
         var diffy = [-1, 0, 1, -1, 1, -1, 0, 1];
@@ -144,7 +142,15 @@ class Grid {
     }
 
     checkSolved() {
-        if (this.revealedCells == ((this.rows * this.cols) - this.numberOfMines)) {
+        var revealedcells = 0;
+        for (var i = 0; i < this.rows; ++i) {
+            for (var j = 0; j < this.cols; ++j) {
+                if (this.grid[i][j].unfolded === false) {
+                    revealedcells++;
+                }
+            }
+        }
+        if (revealedcells == ((this.rows * this.cols) - this.numberOfMines)) {
             return true;
         }
         else {
@@ -173,6 +179,7 @@ class Grid {
     }
 
     revealSafe() {
+        var changesMade = 0;
         for (var i = 0; i < this.rows; ++i) {
             for (var j = 0; j < this.cols; ++j) {
                 if (this.grid[i][j].unfolded === true) {
@@ -205,10 +212,10 @@ class Grid {
                             if (this.grid[row][col].unfolded === true && this.grid[row][col].flagged === false) {
                                 this.grid[row][col].flag();
                                 flagged++;
+                                changesMade++;
                             }
                         }
                     }
-                    console.log("Done flagging");
                 }
 
                 if (this.grid[i][j].number === flagged) {
@@ -219,13 +226,14 @@ class Grid {
                         var col = j + diffy[k];
                         if (row >= 0 && row <= this.rows - 1 && col >= 0 && col <= this.cols - 1) {
                             if (this.grid[row][col].unfolded === true) {
-                                this.grid[row][col].reveal();
-                                this.revealedCells++;
+                                this.floodFill(row, col);
+                                changesMade++;
                             }
                         }
                     }
                 }
             }
         }
+        return changesMade;
     }
 }

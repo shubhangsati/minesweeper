@@ -1,5 +1,5 @@
-var rows = 10;
-var cols = 15;
+var rows = 16;
+var cols = 30;
 
 var grid = new Grid(rows, cols, 0.2);
 var flagsUsed = grid.numberOfMines;
@@ -44,6 +44,7 @@ function handleClick(row, col) {
         grid.populateGrid(row, col);
     }
     // grid.grid[row][col].reveal();
+    if (grid.grid[row][col].flagged) {return;}
     if (grid.grid[row][col].number === -1) {
         alert("BOMB! GAME OVER!");
         window.location.reload();
