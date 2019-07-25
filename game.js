@@ -1,5 +1,5 @@
-var rows = 5;
-var cols = 5;
+var rows = 10;
+var cols = 15;
 
 var grid = new Grid(rows, cols, 0.2);
 var flagsUsed = grid.numberOfMines;
@@ -51,11 +51,19 @@ function handleClick(row, col) {
     }
     grid.floodFill(row, col);
     updateMineGrid();
+    grid.revealSafe();
+    updateMineGrid();
+    if (grid.checkSolved()) {
+        alert("You Win!");
+        window.location.reload();
+    }
 }
 
 function handleRightClick(row, col) {
     if (grid.grid[row][col].unfolded === false) {return;}
     grid.grid[row][col].flag();
+    updateMineGrid();
+    grid.revealSafe();
     updateMineGrid();
     return false;
 }

@@ -47,6 +47,8 @@ class Block {
 
 class Grid {
     constructor(rows, cols, minesPercentage=0.15) {
+        this.solved = false;
+        this.revealedCells = 0;
         this.rows = rows;
         this.cols = cols;
         this.minesPercentage = minesPercentage;
@@ -127,6 +129,7 @@ class Grid {
         if (this.grid[row][col].number === -1) {return;}
         if (this.grid[row][col].unfolded === false) {return;}
         this.grid[row][col].reveal();
+        this.revealedCells++;
         if (this.grid[row][col].number != 0) {return;}
         var diffx = [-1, -1, -1, 0, 0, 1, 1, 1];
         var diffy = [-1, 0, 1, -1, 1, -1, 0, 1];
@@ -136,6 +139,92 @@ class Grid {
             if (newrow >= 0 && newrow <= this.rows - 1 && 
                 newcol >= 0 && newcol <= this.cols - 1) {
                 this.floodFill(newrow, newcol);
+            }
+        }
+    }
+
+    checkSolved() {
+        if (this.revealedCells == ((this.rows * this.cols) - this.numberOfMines)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    getRevealedGrid() {
+        var res = [];
+        for (var i = 0; i < this.rows; ++i) {
+            var k = [];
+            for (var j = 0; j < this.cols; ++j) {
+                if (this.grid[i][j].string === this.grid[i][j].number.toString()) {
+                    k.push(this.grid[i][j].number);
+                }
+                else if (this.grid[i][j].unfolded === false && this.grid[i][j].string === "<br>") {
+                    k.push(0);
+                }
+                else {
+                    k.push(-1);
+                }
+            }
+            res.push(k);
+        }
+        return res;
+    }
+
+    revealSafe() {
+        for (var i = 0; i < this.rows; ++i) {
+            for (var j = 0; j < this.cols; ++j) {
+                if (this.grid[i][j].unfolded === true) {
+                    continue;
+                }
+                var diffx = [-1, -1, -1, 0, 0, 1, 1, 1];
+                var diffy = [-1, 0, 1, -1, 1, -1, 0, 1];
+                var flagged = 0;
+                var unopened = 0;
+                for (var k = 0; k < 8; ++k) {
+                    var row = i + diffx[k];
+                    var col = j + diffy[k];
+                    if (row >= 0 && row <= this.rows - 1 && col >= 0 && col <= this.cols - 1) {
+                        if (this.grid[row][col].flagged === true) {
+                            flagged++;
+                        }
+                        else if (this.grid[row][col].unfolded === true) {
+                            unopened++;
+                        }
+                    }
+                }
+
+                if (this.grid[i][j].number === (flagged + unopened)) {
+                    var diffx = [-1, -1, -1, 0, 0, 1, 1, 1];
+                    var diffy = [-1, 0, 1, -1, 1, -1, 0, 1];
+                    for (var k = 0; k < 8; ++k) {
+                        var row = i + diffx[k];
+                        var col = j + diffy[k];
+                        if (row >= 0 && row <= this.rows - 1 && col >= 0 && col <= this.cols - 1) {
+                            if (this.grid[row][col].unfolded === true && this.grid[row][col].flagged === false) {
+                                this.grid[row][col].flag();
+                                flagged++;
+                            }
+                        }
+                    }
+                    console.log("Done flagging");
+                }
+
+                if (this.grid[i][j].number === flagged) {
+                    var diffx = [-1, -1, -1, 0, 0, 1, 1, 1];
+                    var diffy = [-1, 0, 1, -1, 1, -1, 0, 1];
+                    for (var k = 0; k < 8; ++k) {
+                        var row = i + diffx[k];
+                        var col = j + diffy[k];
+                        if (row >= 0 && row <= this.rows - 1 && col >= 0 && col <= this.cols - 1) {
+                            if (this.grid[row][col].unfolded === true) {
+                                this.grid[row][col].reveal();
+                                this.revealedCells++;
+                            }
+                        }
+                    }
+                }
             }
         }
     }
