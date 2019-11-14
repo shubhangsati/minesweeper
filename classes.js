@@ -179,60 +179,64 @@ class Grid {
     }
 
     revealSafe() {
-        var changesMade = 0;
-        for (var i = 0; i < this.rows; ++i) {
-            for (var j = 0; j < this.cols; ++j) {
-                if (this.grid[i][j].unfolded === true) {
-                    continue;
-                }
-                var diffx = [-1, -1, -1, 0, 0, 1, 1, 1];
-                var diffy = [-1, 0, 1, -1, 1, -1, 0, 1];
-                var flagged = 0;
-                var unopened = 0;
-                for (var k = 0; k < 8; ++k) {
-                    var row = i + diffx[k];
-                    var col = j + diffy[k];
-                    if (row >= 0 && row <= this.rows - 1 && col >= 0 && col <= this.cols - 1) {
-                        if (this.grid[row][col].flagged === true) {
-                            flagged++;
-                        }
-                        else if (this.grid[row][col].unfolded === true) {
-                            unopened++;
-                        }
+        var changesMade = 1;
+        while (changesMade > 0) {
+            changesMade = 0;
+            for (var i = 0; i < this.rows; ++i) {
+                for (var j = 0; j < this.cols; ++j) {
+                    if (this.grid[i][j].unfolded === true) {
+                        continue;
                     }
-                }
-
-                if (this.grid[i][j].number === (flagged + unopened)) {
                     var diffx = [-1, -1, -1, 0, 0, 1, 1, 1];
                     var diffy = [-1, 0, 1, -1, 1, -1, 0, 1];
+                    var flagged = 0;
+                    var unopened = 0;
                     for (var k = 0; k < 8; ++k) {
                         var row = i + diffx[k];
                         var col = j + diffy[k];
                         if (row >= 0 && row <= this.rows - 1 && col >= 0 && col <= this.cols - 1) {
-                            if (this.grid[row][col].unfolded === true && this.grid[row][col].flagged === false) {
-                                this.grid[row][col].flag();
+                            if (this.grid[row][col].flagged === true) {
                                 flagged++;
-                                changesMade++;
+                            }
+                            else if (this.grid[row][col].unfolded === true) {
+                                unopened++;
                             }
                         }
                     }
-                }
 
-                if (this.grid[i][j].number === flagged) {
-                    var diffx = [-1, -1, -1, 0, 0, 1, 1, 1];
-                    var diffy = [-1, 0, 1, -1, 1, -1, 0, 1];
-                    for (var k = 0; k < 8; ++k) {
-                        var row = i + diffx[k];
-                        var col = j + diffy[k];
-                        if (row >= 0 && row <= this.rows - 1 && col >= 0 && col <= this.cols - 1) {
-                            if (this.grid[row][col].unfolded === true) {
-                                this.floodFill(row, col);
-                                changesMade++;
+                    if (this.grid[i][j].number === (flagged + unopened)) {
+                        var diffx = [-1, -1, -1, 0, 0, 1, 1, 1];
+                        var diffy = [-1, 0, 1, -1, 1, -1, 0, 1];
+                        for (var k = 0; k < 8; ++k) {
+                            var row = i + diffx[k];
+                            var col = j + diffy[k];
+                            if (row >= 0 && row <= this.rows - 1 && col >= 0 && col <= this.cols - 1) {
+                                if (this.grid[row][col].unfolded === true && this.grid[row][col].flagged === false) {
+                                    this.grid[row][col].flag();
+                                    flagged++;
+                                    changesMade++;
+                                }
+                            }
+                        }
+                    }
+
+                    if (this.grid[i][j].number === flagged) {
+                        var diffx = [-1, -1, -1, 0, 0, 1, 1, 1];
+                        var diffy = [-1, 0, 1, -1, 1, -1, 0, 1];
+                        for (var k = 0; k < 8; ++k) {
+                            var row = i + diffx[k];
+                            var col = j + diffy[k];
+                            if (row >= 0 && row <= this.rows - 1 && col >= 0 && col <= this.cols - 1) {
+                                if (this.grid[row][col].unfolded === true) {
+                                    this.floodFill(row, col);
+                                    changesMade++;
+                                }
                             }
                         }
                     }
                 }
             }
+            console.log(changesMade);
         }
         return changesMade;
     }

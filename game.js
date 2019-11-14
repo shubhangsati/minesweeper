@@ -1,7 +1,7 @@
 var rows = 16;
 var cols = 30;
 
-var grid = new Grid(rows, cols, 0.2);
+var grid = new Grid(rows, cols, 0.25);
 var flagsUsed = grid.numberOfMines;
 
 $("#mineGrid").append(grid.getHTML());
